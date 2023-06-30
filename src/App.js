@@ -9,23 +9,20 @@ function Square({ value, onSquareClick }) {
     );
 }
 
-function Board() {
-    const [squares, setSquares] = useState(Array(9).fill(null));
-    const [isXNext, setXNext] = useState(true);
+function Board({ isXNext, squares, onPlay }) {
     const [count, setCount] = useState(0);
 
-    const result = calculateWinner(squares);
-    function handleClick(index) {
-        const updatedSquares = squares.slice();
+    let result = calculateWinner(squares);
 
-        if (updatedSquares[index] != null || result) {
+    function handleClick(index) {
+        if (squares[index] != null || result) {
             return;
         }
 
+        const updatedSquares = squares.slice();
         updatedSquares[index] = isXNext ? "X" : "O";
         setCount(count + 1);
-        setXNext(!isXNext);
-        setSquares(updatedSquares);
+        onPlay(updatedSquares);
     }
 
     function calculateWinner(boardArr) {
@@ -37,7 +34,7 @@ function Board() {
             [1, 4, 7],
             [2, 5, 8],
             [0, 4, 8],
-            [2, 4, 8],
+            [2, 4, 6],
         ];
 
         for (let i = 0; i < winnerArr.length; i++) {
@@ -69,7 +66,7 @@ function Board() {
     if (result !== null) {
         status = "Winner: " + result;
     } else if (areAllFilled(squares)) {
-        status = "Game over! Let's have one more on us!!!";
+        status = "Game over and it's a tie! Let's have one more on us!!!";
     } else {
         status = "Next player's turn: " + (isXNext ? "X" : "O");
     }
@@ -120,13 +117,49 @@ function Board() {
     );
 }
 
-function App() {
+function Game() {
+    const [isXNext, setXNext] = useState(true);
+    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const currentSquares = history[history.length - 1];
+
+    function handlePlay(updatedSquares) {
+        setHistory([...history, updatedSquares]);
+        setXNext(!isXNext);
+    }
+
+    function jumpTo(nextMove) {}
+
+    const moves = history.map((squares, move) => {
+        let description;
+
+        if (move > 0) {
+            description = "Go to move #" + move;
+        } else {
+            description = "Go to game start";
+        }
+
+        return (
+            <li>
+                <button onClick={() => jumpTo(move)}>{description}</button>
+            </li>
+        );
+    });
+
     return (
-        <div>
-            <h1>Welcome to Tic-Tac-Toe!</h1>
-            <Board />
-        </div>
+        <>
+            <div cl="game">
+                <h1>Welcome to Tic-Tac-Toe!</h1>
+                <Board
+                    isXNext={isXNext}
+                    squares={currentSquares}
+                    onPlay={handlePlay}
+                />
+            </div>
+            <div className="game-info">
+                <ol>{moves}</ol>
+            </div>
+        </>
     );
 }
 
-export default App;
+export default Game;
