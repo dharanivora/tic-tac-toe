@@ -118,16 +118,23 @@ function Board({ isXNext, squares, onPlay }) {
 }
 
 function Game() {
-    const [isXNext, setXNext] = useState(true);
     const [history, setHistory] = useState([Array(9).fill(null)]);
-    const currentSquares = history[history.length - 1];
+    const [currentMove, setCurrentMove] = useState(0);
+    const currentSquares = history[currentMove];
+    const isXNext = currentMove % 2 === 0;
 
     function handlePlay(updatedSquares) {
-        setHistory([...history, updatedSquares]);
-        setXNext(!isXNext);
+        const nextHistory = [
+            ...history.slice(0, currentMove + 1),
+            updatedSquares,
+        ];
+        setHistory(nextHistory);
+        setCurrentMove(nextHistory.length - 1);
     }
 
-    function jumpTo(nextMove) {}
+    function jumpTo(nextMove) {
+        setCurrentMove(nextMove);
+    }
 
     const moves = history.map((squares, move) => {
         let description;
@@ -139,16 +146,16 @@ function Game() {
         }
 
         return (
-            <li>
+            <li key={move}>
                 <button onClick={() => jumpTo(move)}>{description}</button>
             </li>
         );
     });
 
     return (
-        <>
-            <div cl="game">
-                <h1>Welcome to Tic-Tac-Toe!</h1>
+        <div className="game">
+            <h1>Welcome to Tic-Tac-Toe!</h1>
+            <div className="game-board">
                 <Board
                     isXNext={isXNext}
                     squares={currentSquares}
@@ -158,7 +165,7 @@ function Game() {
             <div className="game-info">
                 <ol>{moves}</ol>
             </div>
-        </>
+        </div>
     );
 }
 
